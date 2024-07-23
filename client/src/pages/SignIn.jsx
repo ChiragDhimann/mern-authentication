@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { signInFailure,signInStart,signInSuccess } from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+
 
 export default function SignIn() {
 
   const [formData,setFormData]=useState({})
-  const [error,setError]=useState(false)
-  const [loading,setLoading]=useState(false)
+  const {loading,error}=useSelector((state)=>state.user)
   const navigate=useNavigate()
-  
+  const dispatch=useDispatch(); 
+
   const handleChange=(e)=>{
     setFormData({...formData,[e.target.id]:e.target.value});
     // console.log(formData)
@@ -17,8 +20,7 @@ export default function SignIn() {
   const handleSubmit=async (e)=>{
     e.preventDefault();
     try{
-      setLoading(true)
-      setError(false)
+      dispatch(signInStart())
       const res=await fetch('/api/auth/signin',{
         method:'POST',
         headers:{
@@ -28,18 +30,20 @@ export default function SignIn() {
       });
       const data=await res.json();
       // console.log(data);
-      setLoading(false)
+      
       if(data.success===false){
-        setError(true)
+        dispatch(signInFailure(data))
         return;
       }
+      dispatch(signInSuccess(data))
       navigate('/');
     }catch(error){
-      setError(true)
-      setLoading(false)
+      dispatch(signInFailure(error))
     }
 
   }
+
+  
 
   return (
     <div className="max-w-lg mx-auto p-3">
@@ -69,7 +73,7 @@ export default function SignIn() {
           <span className="font-semibold text-blue-500">Sign up</span>
         </Link>
       </div>
-      <p className="text-red-600 text-[20px] mt-2">{error && 'Something went wrong'}</p>
+      <p className="text-red-600 text-[20px] mt-2">{error?error.message|| 'Something went wrong':""}</p>
     </div>
   );
 }
