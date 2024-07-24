@@ -6,7 +6,7 @@ import {getDownloadURL, getStorage, uploadBytesResumable} from 'firebase/storage
 import {app} from '../firebase.js'
 import { ref } from "firebase/storage";
 import { useDispatch } from "react-redux";
-import { updateUserFailure,updateUserStart,updateUserSuccess,deleteUserFailure,deleteUserStart,deleteUserSuccess } from "../redux/user/userSlice.js";
+import { updateUserFailure,updateUserStart,updateUserSuccess,deleteUserFailure,deleteUserStart,deleteUserSuccess,signOut } from "../redux/user/userSlice.js";
 
 export default function Profile() {
   const dispatch=useDispatch();
@@ -87,6 +87,15 @@ export default function Profile() {
   }
   
 
+  const handleSignout=async ()=>{
+    try{
+      await fetch('/api/auth/signout');
+      dispatch(signOut());
+    }catch(error){
+      console.log(error);
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto p-3">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -142,7 +151,7 @@ export default function Profile() {
       </form>
       <div className="flex justify-between mt-2">
         <span onClick={handleDelete} className="text-red-700 cursor-pointer font-semibold ">Delete Account</span>
-        <span className="text-red-700 cursor-pointer font-semibold">Sign Out</span>
+        <span onClick={handleSignout} className="text-red-700 cursor-pointer font-semibold">Sign Out</span>
       </div>
       <p className="text-red-700 mt-5">{error && "Something went wrong!"}</p>
       <p className="text-green-700 mt-5">{updateSuccess && "User updated successfully!"}</p>
